@@ -6,10 +6,11 @@ package a;
  * @date 2024/3/28 13:16
  */
 
-public class User {
+public class User1 {
     private String name;
     private Integer age;
-    private Integer sex;
+
+    private String sex;
 
     public String getName() {
         return name;
@@ -27,20 +28,20 @@ public class User {
         this.age = age;
     }
 
-    public Integer getSex() {
+    public String getSex() {
         return sex;
     }
 
-    public void setSex(Integer sex) {
+    public void setSex(String sex) {
         this.sex = sex;
     }
 
     @Override
     public String toString() {
-        return "User{" +
+        return "User1{" +
                 "name='" + name + '\'' +
                 ", age=" + age +
-                ", sex=" + sex +
+                ", sex='" + sex + '\'' +
                 '}';
     }
 }

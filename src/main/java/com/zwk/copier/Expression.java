@@ -75,8 +75,8 @@ public class Expression {
             } else {
                 Class<?> rightClass = pair.getRightClass();
                 if (rightClass == null) {
-                    PropertyDescriptor propertyDescriptor = rightProperty.get(pair.getLeft());
-                    if (propertyDescriptor == null || propertyDescriptor.getWriteMethod() == null) {
+                    PropertyDescriptor propertyDescriptor = rightProperty.get(pair.getRight());
+                    if (propertyDescriptor == null || propertyDescriptor.getReadMethod() == null) {
                         throw new NoSuchMethodException(right.getName() + " no get method for property: " + pair.getRight());
                     }
                     rightClass = propertyDescriptor.getReadMethod().getReturnType();

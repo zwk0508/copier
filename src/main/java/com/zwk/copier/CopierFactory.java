@@ -1,7 +1,6 @@
 package com.zwk.copier;
 
 import com.zwk.utils.ClassUtil;
-import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.CompilerFactoryFactory;
 import org.codehaus.commons.compiler.IClassBodyEvaluator;
 import org.codehaus.commons.compiler.ICompilerFactory;
@@ -26,9 +25,8 @@ public class CopierFactory {
     private static ICompilerFactory cf;
 
     /**
-     * 从文件读取配置
+     * 创建默认CopierFactory
      *
-     * @param file
      * @return com.zwk.copier.CopierFactory
      * @throws
      * @author zwk
@@ -67,7 +65,7 @@ public class CopierFactory {
     /**
      * 从InputStream读取配置
      *
-     * @param file
+     * @param inputStream
      * @return com.zwk.copier.CopierFactory
      * @throws
      * @author zwk
@@ -80,7 +78,7 @@ public class CopierFactory {
     /**
      * 从Reader读取配置
      *
-     * @param file
+     * @param reader
      * @return com.zwk.copier.CopierFactory
      * @throws
      * @author zwk
@@ -93,7 +91,7 @@ public class CopierFactory {
     /**
      * 从String读取配置
      *
-     * @param file
+     * @param s
      * @return com.zwk.copier.CopierFactory
      * @throws
      * @author zwk

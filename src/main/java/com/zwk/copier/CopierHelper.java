@@ -9,6 +9,7 @@ import java.util.Map;
  * @date 2024/3/28 11:03
  */
 
+@SuppressWarnings("all")
 public class CopierHelper {
     private CopierFactory copierFactory;
 

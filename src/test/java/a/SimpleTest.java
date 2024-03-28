@@ -17,9 +17,11 @@ public class SimpleTest {
     private static CopierHelper helper = new CopierHelper(copierFactory);
 
     public static void main(String[] args) throws Exception {
-        beanToMap();
-        mapToBean();
-        beanToBean();
+//        beanToMap();
+//        mapToBean();
+//        beanToBean();
+//        beanToBeanD();
+        mapToMap();
 
     }
 
@@ -27,6 +29,7 @@ public class SimpleTest {
         User user = new User();
         user.setAge(18);
         user.setName("zs");
+        user.setSex(1);
         Map copy = helper.copy(Map.class, user);
         System.out.println("copy = " + copy);
     }
@@ -35,6 +38,7 @@ public class SimpleTest {
         Map<Object, Object> map = new HashMap<>();
         map.put("age", 18);
         map.put("name", "zs");
+        map.put("sex", 1);
 
         User copy = helper.copy(User.class, map);
         System.out.println("copy = " + copy);
@@ -44,8 +48,29 @@ public class SimpleTest {
         User user = new User();
         user.setAge(18);
         user.setName("zs");
+        user.setSex(1);
 
         User copy = helper.copy(User.class, user);
+        System.out.println("copy = " + copy);
+    }
+
+    private static void beanToBeanD() throws Exception {
+        User user = new User();
+        user.setAge(18);
+        user.setName("zs");
+        user.setSex(1);//属性类型不同
+
+        User1 copy = helper.copy(User1.class, user);
+        System.out.println("copy = " + copy);
+    }
+
+    private static void mapToMap() throws Exception {
+        Map<Object, Object> map = new HashMap<>();
+        map.put("age", 18);
+        map.put("name", "zs");
+        map.put("sex", 1);
+
+        Map copy = helper.copy(Map.class, map);
         System.out.println("copy = " + copy);
     }
 
