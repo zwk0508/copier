@@ -1,0 +1,51 @@
+options {
+    STATIC = false;
+    JAVA_UNICODE_ESCAPE = true;
+    UNICODE_INPUT = true;
+}
+PARSER_BEGIN(CopyParser)
+package com.zwk.copier;
+import java.util.HashMap;
+import java.util.Map;
+
+public class CopyParser {
+    private Map<String,Expression> map = new HashMap<>();
+
+    public Expression getExpression(String id){
+        return map.get(id);
+    }
+}
+PARSER_END(CopyParser)
+
+SKIP : {<(" " | "\t" | "\r" | "\n")>}
+SKIP : {<("//" | "#") ( ~["\r","\n"])* ("\r"|"\n"|"\r\n")>}
+
+
+TOKEN :
+{
+  <EQ: "=">
+| <DOT: ".">
+| <QUOTE: "'">
+| <LB: "{">
+| <RB: "}">
+| <IDENTIFIER: (<LETTER>)+>
+| <#LETTER: ["a"-"z","A"-"Z","0"-"9","_","$"]>
+}
+
+void root():{
+    Token id;
+    Token t;
+    Expression e;
+    Pair p;
+}
+{
+ ( id = <IDENTIFIER> {if (map.containsKey(id.image)){throw new IllegalArgumentException("id repeat : "+id.image);} e = new Expression();}  <LB>
+    (t = <IDENTIFIER>{p =new Pair();p.setLeft(t.image);}
+    <EQ>
+    t= <IDENTIFIER>{p.setRight(t.image); e.addPair(p);}
+    )+
+   <RB>
+   {map.put(id.image,e);}
+ )+
+}
+
