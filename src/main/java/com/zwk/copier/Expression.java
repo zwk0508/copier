@@ -26,7 +26,7 @@ public class Expression {
         pairs.add(pair);
     }
 
-    public String generateExpression(Class<?> left, Class<?> right) throws Exception {
+    public String generateExpression(Class<?> left, Class<?> right, boolean useConverter) throws Exception {
         StringBuilder sb = new StringBuilder();
         boolean leftMap = ClassUtil.isMap(left);
         boolean rightMap = ClassUtil.isMap(right);
@@ -107,7 +107,7 @@ public class Expression {
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
-    public static Expression createExpression(Class<?> left, Class<?> right) throws IntrospectionException {
+    public static Expression createExpression(Class<?> left, Class<?> right, boolean userConverter) throws IntrospectionException {
         boolean leftMap = ClassUtil.isMap(left);
         boolean rightMap = ClassUtil.isMap(right);
         if (leftMap && rightMap) {

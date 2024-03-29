@@ -1,5 +1,6 @@
 package com.zwk.copier;
 
+import com.zwk.converter.*;
 import com.zwk.utils.ClassUtil;
 import org.codehaus.commons.compiler.CompilerFactoryFactory;
 import org.codehaus.commons.compiler.IClassBodyEvaluator;
@@ -7,9 +8,7 @@ import org.codehaus.commons.compiler.ICompilerFactory;
 import org.codehaus.janino.ClassBodyEvaluator;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author zwk
@@ -22,7 +21,25 @@ public class CopierFactory {
 
     private Map<String, Copier<?, ?>> map = new HashMap<>();
 
+    private List<Converter> defaultConverters = new ArrayList<>();
+    private List<Converter> customConverters = new ArrayList<>();
+
+    private final boolean useConverter;
+
     private static ICompilerFactory cf;
+
+    /**
+     * 创建默认CopierFactory
+     *
+     * @param useConverter 是否使用转换器
+     * @return com.zwk.copier.CopierFactory
+     * @throws
+     * @author zwk
+     * @date 2024/3/28 10:57
+     */
+    public static CopierFactory createDefault(boolean useConverter) {
+        return new CopierFactory(useConverter);
+    }
 
     /**
      * 创建默认CopierFactory
@@ -33,7 +50,7 @@ public class CopierFactory {
      * @date 2024/3/28 10:57
      */
     public static CopierFactory createDefault() {
-        return new CopierFactory();
+        return new CopierFactory(false);
     }
 
     /**
@@ -46,7 +63,21 @@ public class CopierFactory {
      * @date 2024/3/28 10:57
      */
     public static CopierFactory fromFile(String file) throws FileNotFoundException, ParseException {
-        return new CopierFactory(new File(file));
+        return fromFile(file, false);
+    }
+
+    /**
+     * 从文件读取配置
+     *
+     * @param file
+     * @param useConverter 是否使用转换器
+     * @return com.zwk.copier.CopierFactory
+     * @throws
+     * @author zwk
+     * @date 2024/3/28 10:57
+     */
+    public static CopierFactory fromFile(String file, boolean useConverter) throws FileNotFoundException, ParseException {
+        return fromReader(new FileReader(file), useConverter);
     }
 
     /**
@@ -59,7 +90,35 @@ public class CopierFactory {
      * @date 2024/3/28 10:57
      */
     public static CopierFactory fromFile(File file) throws FileNotFoundException, ParseException {
-        return new CopierFactory(file);
+        return fromFile(file, false);
+    }
+
+    /**
+     * 从文件读取配置
+     *
+     * @param file
+     * @param useConverter 是否使用转换器
+     * @return com.zwk.copier.CopierFactory
+     * @throws
+     * @author zwk
+     * @date 2024/3/28 10:57
+     */
+    public static CopierFactory fromFile(File file, boolean useConverter) throws FileNotFoundException, ParseException {
+        return fromReader(new FileReader(file), useConverter);
+    }
+
+
+    /**
+     * 从InputStream读取配置
+     *
+     * @param inputStream
+     * @return com.zwk.copier.CopierFactory
+     * @throws
+     * @author zwk
+     * @date 2024/3/28 10:57
+     */
+    public static CopierFactory fromInputStream(InputStream inputStream, boolean useConverter) throws ParseException {
+        return new CopierFactory(inputStream, useConverter);
     }
 
     /**
@@ -71,8 +130,8 @@ public class CopierFactory {
      * @author zwk
      * @date 2024/3/28 10:57
      */
-    public static CopierFactory fromInputStream(InputStream inputStream) throws FileNotFoundException, ParseException {
-        return new CopierFactory(inputStream);
+    public static CopierFactory fromInputStream(InputStream inputStream) throws ParseException {
+        return fromInputStream(inputStream, false);
     }
 
     /**
@@ -84,8 +143,8 @@ public class CopierFactory {
      * @author zwk
      * @date 2024/3/28 10:57
      */
-    public static CopierFactory fromReader(Reader reader) throws FileNotFoundException, ParseException {
-        return new CopierFactory(reader);
+    public static CopierFactory fromReader(Reader reader, boolean useConverter) throws ParseException {
+        return new CopierFactory(reader, useConverter);
     }
 
     /**
@@ -97,29 +156,62 @@ public class CopierFactory {
      * @author zwk
      * @date 2024/3/28 10:57
      */
-    public static CopierFactory fromString(String s) throws FileNotFoundException, ParseException {
-        return new CopierFactory(new StringReader(s));
+    public static CopierFactory fromString(String s) throws ParseException {
+        return fromReader(new StringReader(s), false);
     }
 
-    private CopierFactory(File configFile) throws FileNotFoundException, ParseException {
-        this(new FileReader(configFile));
+    /**
+     * 从String读取配置
+     *
+     * @param s
+     * @return com.zwk.copier.CopierFactory
+     * @throws
+     * @author zwk
+     * @date 2024/3/28 10:57
+     */
+    public static CopierFactory fromString(String s, boolean useConverter) throws ParseException {
+        return fromReader(new StringReader(s), useConverter);
     }
 
-    private CopierFactory(InputStream configInPutStream) throws FileNotFoundException, ParseException {
-        this(new CopyParser(configInPutStream));
+    private CopierFactory(InputStream configInPutStream, boolean useConverter) throws ParseException {
+        this(new CopyParser(configInPutStream), useConverter);
     }
 
-    private CopierFactory(Reader reader) throws ParseException {
-        this(new CopyParser(reader));
+    private CopierFactory(Reader reader, boolean useConverter) throws ParseException {
+        this(new CopyParser(reader), useConverter);
     }
 
-    private CopierFactory(CopyParser parser) throws ParseException {
+    private CopierFactory(CopyParser parser, boolean useConverter) throws ParseException {
         parser.root();
         this.parser = parser;
+        this.useConverter = useConverter;
     }
 
-    private CopierFactory() {
+    private CopierFactory(boolean useConverter) {
+        this.useConverter = false;
+    }
 
+    {
+        defaultConverters.add(new StringToByteConverter());
+        defaultConverters.add(new StringToShortConverter());
+        defaultConverters.add(new StringToIntegerConverter());
+        defaultConverters.add(new StringToLongConverter());
+        defaultConverters.add(new StringToFloatConverter());
+        defaultConverters.add(new StringToDoubleConverter());
+        defaultConverters.add(new StringToBooleanConverter());
+        defaultConverters.add(new StringToCharConverter());
+        defaultConverters.add(new StringToBigIntegerConverter());
+        defaultConverters.add(new StringToBigDecimalConverter());
+        defaultConverters.add(new StringToEnumConverter());
+        defaultConverters.add(new EnumToStringConverter());
+        defaultConverters.add(new ArrayToCollectionConverter());
+        defaultConverters.add(new CollectionToArrayConverter());
+
+        defaultConverters.add(new ObjectToStringConverter());
+    }
+
+    public void registerConverter(Converter converter) {
+        customConverters.add(converter);
     }
 
 
@@ -151,7 +243,7 @@ public class CopierFactory {
                 map.put(key, mapCopy);
                 return mapCopy;
             }
-            Expression expression = Expression.createExpression(left, right);
+            Expression expression = Expression.createExpression(left, right, useConverter);
             return createCopier(left, right, sourceName, targetName, expression, key);
         }
     }
@@ -191,6 +283,7 @@ public class CopierFactory {
             cbe = cf.newClassBodyEvaluator();
         }
 
+        cbe.setExtendedClass(BaseCopier.class);
         cbe.setDefaultImports(sourceName, targetName);
         cbe.setImplementedInterfaces(new Class[]{Copier.class});
         String ssName = left.getSimpleName();
@@ -207,7 +300,7 @@ public class CopierFactory {
                 .append(" ")
                 .append(rightParamName)
                 .append("){")
-                .append(expression.generateExpression(left, right))
+                .append(expression.generateExpression(left, right, useConverter))
                 .append("}")
                 .append("public void copy(")
                 .append("Object ")
@@ -230,6 +323,13 @@ public class CopierFactory {
         return (Copier<L, R>) object;
     }
 
+    public List<Converter> getDefaultConverters() {
+        return defaultConverters;
+    }
+
+    public List<Converter> getCustomConverters() {
+        return customConverters;
+    }
 
     static {
         try {
